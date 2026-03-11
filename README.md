@@ -1,2 +1,2 @@
-# devexpertai_proyect
+# devexpertai
 Proyecto del curso AI Expert

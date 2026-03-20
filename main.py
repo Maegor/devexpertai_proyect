@@ -4,6 +4,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from database import engine, Base
 from routers import internal_user, partner, billing_entity, web, invoice
 from routers import admin
+from routers import partner_portal
 
 
 @asynccontextmanager
@@ -18,12 +19,13 @@ app = FastAPI(title="DevExpert AI", lifespan=lifespan)
 
 app.add_middleware(SessionMiddleware, secret_key="change-me-in-production-use-env-var")
 
-app.include_router(internal_user.router)
-app.include_router(partner.router)
-app.include_router(billing_entity.router)
-app.include_router(invoice.router)
+app.include_router(internal_user.router, prefix="/api")
+app.include_router(partner.router, prefix="/api")
+app.include_router(billing_entity.router, prefix="/api")
+app.include_router(invoice.router, prefix="/api")
 app.include_router(web.router)
 app.include_router(admin.router)
+app.include_router(partner_portal.router)
 
 
 @app.get("/")

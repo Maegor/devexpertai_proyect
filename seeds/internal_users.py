@@ -41,11 +41,7 @@ USERS = [
 ]
 
 
-import bcrypt as _bcrypt
-
-
-def _hash(password: str) -> str:
-    return _bcrypt.hashpw(password.encode(), _bcrypt.gensalt()).decode()
+from seeds.utils import hash_password
 
 
 async def run():
@@ -65,7 +61,7 @@ async def run():
             user = InternalUser(
                 name=name,
                 email=email,
-                password_hash=_hash("Password1234!"),
+                password_hash=hash_password("Password1234!"),
                 role=role,
                 is_active=True,
             )

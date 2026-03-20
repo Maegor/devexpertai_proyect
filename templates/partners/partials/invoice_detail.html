@@ -1,0 +1,193 @@
+<style>
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        background: none;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 0.3rem 0.75rem;
+        cursor: pointer;
+        margin-bottom: 1.5rem;
+        transition: border-color 0.15s, color 0.15s;
+        text-decoration: none;
+    }
+    .back-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .invoice-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+    .invoice-ref { font-size: 1.3rem; font-weight: 700; color: var(--accent); }
+    .invoice-period { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .detail-item {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.8rem 1rem;
+    }
+    .detail-label {
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        margin-bottom: 0.3rem;
+    }
+    .detail-value { font-size: 0.9rem; color: var(--text); }
+    .detail-value.empty { color: var(--text-dim); font-style: italic; }
+
+    .amounts-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    .amounts-title {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        margin-bottom: 1rem;
+    }
+    .amount-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.4rem 0;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        border-bottom: 1px solid var(--border);
+    }
+    .amount-row:last-child { border-bottom: none; }
+    .amount-row.total {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-top: 0.25rem;
+    }
+    .amount-val { font-variant-numeric: tabular-nums; }
+
+    .badge-inv-status {
+        display: inline-block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.25rem 0.8rem;
+        border-radius: 20px;
+    }
+    .inv-sent         { background: rgba(99,179,237,0.12); color: #63b3ed; }
+    .inv-under-review { background: rgba(251,191,36,0.12); color: #fbbf24; }
+    .inv-approved     { background: rgba(52,211,153,0.12); color: #34d399; }
+    .inv-pending-pay  { background: rgba(167,139,250,0.12); color: #a78bfa; }
+    .inv-paid         { background: rgba(52,211,153,0.15); color: #6ee7b7; }
+    .inv-rejected     { background: rgba(239,68,68,0.12); color: #ef4444; }
+    .inv-cancelled    { background: rgba(148,163,184,0.12); color: #94a3b8; }
+</style>
+
+<button class="back-btn"
+        hx-get="/partners/dashboard/invoices"
+        hx-target="#content-area"
+        hx-swap="innerHTML">
+    <i class="bi bi-arrow-left"></i> Back to Invoices
+</button>
+
+<div class="invoice-header">
+    <div>
+        <div class="invoice-ref">{{ invoice.invoice_reference }}</div>
+        <div class="invoice-period">Period: {{ invoice.period }}</div>
+    </div>
+    <div>
+        {% set st = invoice.status.value %}
+        {% if st == 'Sent' %}
+            <span class="badge-inv-status inv-sent">{{ st }}</span>
+        {% elif st == 'Under review' %}
+            <span class="badge-inv-status inv-under-review">{{ st }}</span>
+        {% elif st == 'Approved' %}
+            <span class="badge-inv-status inv-approved">{{ st }}</span>
+        {% elif st == 'Pending payment' %}
+            <span class="badge-inv-status inv-pending-pay">{{ st }}</span>
+        {% elif st == 'Paid' %}
+            <span class="badge-inv-status inv-paid">{{ st }}</span>
+        {% elif st == 'Rejected' %}
+            <span class="badge-inv-status inv-rejected">{{ st }}</span>
+        {% else %}
+            <span class="badge-inv-status inv-cancelled">{{ st }}</span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="detail-grid">
+    <div class="detail-item">
+        <div class="detail-label">Type</div>
+        <div class="detail-value">{{ invoice.invoice_type.value }}</div>
+    </div>
+    <div class="detail-item">
+        <div class="detail-label">Currency</div>
+        <div class="detail-value">{{ invoice.currency }}</div>
+    </div>
+    <div class="detail-item">
+        <div class="detail-label">Tax Rate</div>
+        <div class="detail-value {% if not invoice.tax_rate %}empty{% endif %}">
+            {{ invoice.tax_rate or 'N/A' }}
+        </div>
+    </div>
+    <div class="detail-item">
+        <div class="detail-label">Created</div>
+        <div class="detail-value">{{ invoice.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+    </div>
+    <div class="detail-item">
+        <div class="detail-label">Scheduled Payment</div>
+        <div class="detail-value {% if not invoice.scheduled_payment_date %}empty{% endif %}">
+            {{ invoice.scheduled_payment_date.strftime('%Y-%m-%d') if invoice.scheduled_payment_date else 'Not scheduled' }}
+        </div>
+    </div>
+</div>
+
+<!-- Amounts -->
+<div class="amounts-card">
+    <div class="amounts-title">Amount Breakdown</div>
+    <div class="amount-row">
+        <span>Net Amount</span>
+        <span class="amount-val">{{ invoice.currency }} {{ "%.2f"|format(invoice.net_amount) }}</span>
+    </div>
+    <div class="amount-row">
+        <span>VAT Amount</span>
+        <span class="amount-val">
+            {% if invoice.vat_amount is not none %}
+                {{ invoice.currency }} {{ "%.2f"|format(invoice.vat_amount) }}
+            {% else %}
+                —
+            {% endif %}
+        </span>
+    </div>
+    <div class="amount-row total">
+        <span>Gross Total</span>
+        <span class="amount-val">{{ invoice.currency }} {{ "%.2f"|format(invoice.gross_total) }}</span>
+    </div>
+</div>
+
+{% if invoice.rejection_reason %}
+<div style="background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 10px; padding: 1rem 1.1rem;">
+    <div style="font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #ef4444; margin-bottom: 0.4rem;">
+        Rejection Reason
+    </div>
+    <div style="font-size: 0.875rem; color: #fca5a5;">{{ invoice.rejection_reason }}</div>
+</div>
+{% endif %}

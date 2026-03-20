@@ -1,0 +1,203 @@
+<style>
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border);
+    }
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+    }
+    .info-item {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.9rem 1.1rem;
+    }
+    .info-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        margin-bottom: 0.3rem;
+    }
+    .info-value {
+        font-size: 0.9rem;
+        color: var(--text);
+        word-break: break-word;
+    }
+    .info-value.empty { color: var(--text-dim); font-style: italic; }
+    .badge-status {
+        display: inline-block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.2rem 0.7rem;
+        border-radius: 20px;
+    }
+    .status-active    { background: rgba(52,211,153,0.12); color: #34d399; }
+    .status-pending   { background: rgba(251,191,36,0.12); color: #fbbf24; }
+    .status-suspended { background: rgba(239,68,68,0.12); color: #ef4444; }
+    .status-inactive  { background: rgba(148,163,184,0.12); color: #94a3b8; }
+    .status-rejected  { background: rgba(239,68,68,0.12); color: #ef4444; }
+    .bool-yes { color: #34d399; }
+    .bool-no  { color: var(--text-dim); }
+</style>
+
+<div class="section-title"><i class="bi bi-person-lines-fill me-2"></i>Personal Data</div>
+
+<div class="info-grid">
+
+    <div class="info-item">
+        <div class="info-label">Name</div>
+        <div class="info-value">{{ partner.name or '—' }}</div>
+    </div>
+
+    <div class="info-item">
+        <div class="info-label">Email</div>
+        <div class="info-value">{{ partner.email or '—' }}</div>
+    </div>
+
+    <div class="info-item">
+        <div class="info-label">Company</div>
+        <div class="info-value {% if not partner.company_name %}empty{% endif %}">
+            {{ partner.company_name or 'Not provided' }}
+        </div>
+    </div>
+
+    <div class="info-item">
+        <div class="info-label">Website</div>
+        <div class="info-value {% if not partner.website %}empty{% endif %}">
+            {{ partner.website or 'Not provided' }}
+        </div>
+    </div>
+
+    <div class="info-item">
+        <div class="info-label">Country</div>
+        <div class="info-value {% if not partner.country %}empty{% endif %}">
+            {{ partner.country or 'Not provided' }}
+        </div>
+    </div>
+
+    <div class="info-item">
+        <div class="info-label">Language</div>
+        <div class="info-value">{{ partner.language_preference or 'en' }}</div>
+    </div>
+
+    <div class="info-item">
+        <div class="info-label">Status</div>
+        <div class="info-value">
+            {% set s = partner.status.value %}
+            {% if s == 'Active' %}
+                <span class="badge-status status-active">{{ s }}</span>
+            {% elif s == 'Pending Review' %}
+                <span class="badge-status status-pending">{{ s }}</span>
+            {% elif s == 'Suspended' %}
+                <span class="badge-status status-suspended">{{ s }}</span>
+            {% elif s == 'Inactive' %}
+                <span class="badge-status status-inactive">{{ s }}</span>
+            {% else %}
+                <span class="badge-status status-rejected">{{ s }}</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="info-item">
+        <div class="info-label">Referral Enabled</div>
+        <div class="info-value">
+            {% if partner.referral_enabled %}
+                <span class="bool-yes"><i class="bi bi-check-circle-fill me-1"></i>Yes</span>
+            {% else %}
+                <span class="bool-no"><i class="bi bi-dash-circle me-1"></i>No</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="info-item">
+        <div class="info-label">Deals Enabled</div>
+        <div class="info-value">
+            {% if partner.deals_enabled %}
+                <span class="bool-yes"><i class="bi bi-check-circle-fill me-1"></i>Yes</span>
+            {% else %}
+                <span class="bool-no"><i class="bi bi-dash-circle me-1"></i>No</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="info-item">
+        <div class="info-label">Self Billing</div>
+        <div class="info-value">
+            {% if partner.self_billing_enabled %}
+                <span class="bool-yes"><i class="bi bi-check-circle-fill me-1"></i>Enabled</span>
+            {% else %}
+                <span class="bool-no"><i class="bi bi-dash-circle me-1"></i>Disabled</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="info-item" style="grid-column: 1 / -1;">
+        <div class="info-label">Collaboration Reason</div>
+        <div class="info-value {% if not partner.collaboration_reason %}empty{% endif %}">
+            {{ partner.collaboration_reason or 'Not provided' }}
+        </div>
+    </div>
+
+</div>
+
+<!-- T&C Section -->
+<div class="section-title mt-4"><i class="bi bi-file-earmark-check me-2"></i>Terms & Conditions</div>
+<div class="info-grid">
+
+    <div class="info-item">
+        <div class="info-label">Version Accepted</div>
+        <div class="info-value {% if not partner.tc_version_accepted %}empty{% endif %}">
+            {{ partner.tc_version_accepted or 'Not accepted' }}
+        </div>
+    </div>
+
+    <div class="info-item">
+        <div class="info-label">Acceptance Date</div>
+        <div class="info-value {% if not partner.tc_acceptance_date %}empty{% endif %}">
+            {{ partner.tc_acceptance_date.strftime('%Y-%m-%d %H:%M') if partner.tc_acceptance_date else 'Not provided' }}
+        </div>
+    </div>
+
+    <div class="info-item">
+        <div class="info-label">Accepted By</div>
+        <div class="info-value {% if not partner.tc_accepted_by %}empty{% endif %}">
+            {{ partner.tc_accepted_by or 'Not provided' }}
+        </div>
+    </div>
+
+    <div class="info-item">
+        <div class="info-label">Acceptance IP</div>
+        <div class="info-value {% if not partner.tc_acceptance_ip %}empty{% endif %}">
+            {{ partner.tc_acceptance_ip or 'Not provided' }}
+        </div>
+    </div>
+
+</div>
+
+<!-- Billing Section -->
+<div class="section-title mt-4"><i class="bi bi-building me-2"></i>Billing & Accounting</div>
+<div class="info-grid">
+
+    <div class="info-item">
+        <div class="info-label">QB Account Referral</div>
+        <div class="info-value {% if not partner.qb_account_referral %}empty{% endif %}">
+            {{ partner.qb_account_referral or 'Not provided' }}
+        </div>
+    </div>
+
+    <div class="info-item">
+        <div class="info-label">QB Account Fixed</div>
+        <div class="info-value {% if not partner.qb_account_fixed %}empty{% endif %}">
+            {{ partner.qb_account_fixed or 'Not provided' }}
+        </div>
+    </div>
+
+</div>

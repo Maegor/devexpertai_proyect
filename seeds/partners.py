@@ -8,6 +8,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from sqlalchemy import select
 from database import SessionLocal, engine, Base
 from models import InternalUser, InternalRole, Partner, PartnerStatus
+from seeds.utils import hash_password
 
 PARTNERS_DATA = [
     ("Acme Corp",           "contact@acmecorp.com",          "Acme Corporation",       "acmecorp.com",          "US"),
@@ -167,6 +168,7 @@ async def run():
             partner = Partner(
                 name=name,
                 email=email,
+                password_hash=hash_password("Password1234!"),
                 company_name=company_name,
                 website=f"https://{website}",
                 country=country,

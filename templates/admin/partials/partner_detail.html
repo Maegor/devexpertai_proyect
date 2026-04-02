@@ -89,6 +89,55 @@
     {% endif %}
 </div>
 
+<!-- Leads -->
+<div class="pd-section-title"><i class="bi bi-person-lines-fill me-2"></i>Leads</div>
+
+{% if leads %}
+<div class="data-table-wrap" style="margin-bottom: 2rem;">
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Company</th>
+            <th>Status</th>
+            <th>Created</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for lead in leads %}
+        <tr style="cursor:pointer;"
+            hx-get="/admin/partners/{{ partner.id }}/leads/{{ lead.id }}"
+            hx-target="#partners-main"
+            hx-swap="innerHTML">
+            <td style="font-weight:500;">{{ lead.name }}</td>
+            <td style="color:var(--text-muted);font-size:0.82rem;">{{ lead.email or '—' }}</td>
+            <td style="color:var(--text-muted);font-size:0.82rem;">{{ lead.company or '—' }}</td>
+            <td>
+                {% set ls = lead.status.value %}
+                {% if ls == 'New' %}<span class="badge-inv-status inv-sent">{{ ls }}</span>
+                {% elif ls == 'Contacted' %}<span class="badge-inv-status inv-under-review">{{ ls }}</span>
+                {% elif ls == 'Qualified' %}<span class="badge-inv-status inv-approved">{{ ls }}</span>
+                {% elif ls == 'Proposal' %}<span class="badge-inv-status inv-pending-pay">{{ ls }}</span>
+                {% elif ls == 'Won' %}<span class="badge-inv-status inv-paid">{{ ls }}</span>
+                {% else %}<span class="badge-inv-status inv-rejected">{{ ls }}</span>
+                {% endif %}
+            </td>
+            <td style="color:var(--text-muted);font-size:0.82rem;white-space:nowrap;">
+                {{ lead.created_at.strftime('%Y-%m-%d') }}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}
+<div class="empty-state" style="padding:1.5rem 0;">
+    <i class="bi bi-person-lines-fill"></i>
+    <span style="font-size:0.85rem;">No leads yet.</span>
+</div>
+{% endif %}
+
 <!-- Invoices -->
 <div class="pd-section-title"><i class="bi bi-receipt me-2"></i>Invoices</div>
 

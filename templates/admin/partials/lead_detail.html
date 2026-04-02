@@ -1,0 +1,60 @@
+<div class="pd-header">
+    <button class="back-btn"
+            hx-get="{{ back_url }}"
+            hx-target="#partners-main"
+            hx-swap="innerHTML">
+        <i class="bi bi-arrow-left"></i> {{ partner.name }}
+    </button>
+
+    <div class="pd-title-row">
+        <div>
+            <div class="pd-name">{{ lead.name }}</div>
+            {% if lead.company %}
+            <div class="pd-company">{{ lead.company }}</div>
+            {% endif %}
+        </div>
+        <div>
+            {% set ls = lead.status.value %}
+            {% if ls == 'New' %}<span class="badge-inv-status inv-sent">{{ ls }}</span>
+            {% elif ls == 'Contacted' %}<span class="badge-inv-status inv-under-review">{{ ls }}</span>
+            {% elif ls == 'Qualified' %}<span class="badge-inv-status inv-approved">{{ ls }}</span>
+            {% elif ls == 'Proposal' %}<span class="badge-inv-status inv-pending-pay">{{ ls }}</span>
+            {% elif ls == 'Won' %}<span class="badge-inv-status inv-paid">{{ ls }}</span>
+            {% else %}<span class="badge-inv-status inv-rejected">{{ ls }}</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Lead details grid -->
+<div class="pd-grid">
+    <div class="pd-item">
+        <div class="pd-label">Email</div>
+        <div class="pd-value {% if not lead.email %}pd-empty{% endif %}">{{ lead.email or '—' }}</div>
+    </div>
+    <div class="pd-item">
+        <div class="pd-label">Phone</div>
+        <div class="pd-value {% if not lead.phone %}pd-empty{% endif %}">{{ lead.phone or '—' }}</div>
+    </div>
+    <div class="pd-item">
+        <div class="pd-label">Company</div>
+        <div class="pd-value {% if not lead.company %}pd-empty{% endif %}">{{ lead.company or '—' }}</div>
+    </div>
+    <div class="pd-item">
+        <div class="pd-label">Partner</div>
+        <div class="pd-value">{{ partner.name }}</div>
+    </div>
+    <div class="pd-item">
+        <div class="pd-label">Created</div>
+        <div class="pd-value">{{ lead.created_at.strftime('%Y-%m-%d') }}</div>
+    </div>
+    <div class="pd-item">
+        <div class="pd-label">Updated</div>
+        <div class="pd-value">{{ lead.updated_at.strftime('%Y-%m-%d') }}</div>
+    </div>
+</div>
+
+{% if lead.notes %}
+<div class="pd-section-title"><i class="bi bi-sticky me-2"></i>Notes</div>
+<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:1rem;color:var(--text-primary);font-size:0.9rem;line-height:1.6;white-space:pre-wrap;">{{ lead.notes }}</div>
+{% endif %}

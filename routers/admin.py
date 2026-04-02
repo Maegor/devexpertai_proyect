@@ -14,6 +14,7 @@ import repositories.partner as partner_repo
 import repositories.invoice as invoice_repo
 import repositories.reward as reward_repo
 import repositories.partner_deal as deal_repo
+import repositories.lead as lead_repo
 from schemas.partner import PartnerUpdate
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -152,9 +153,11 @@ async def partner_detail(
     invoices_sorted = sorted(invoices, key=lambda i: i.created_at, reverse=True)
     rewards = await reward_repo.get_by_partner(db, partner_id)
     rewards_sorted = sorted(rewards, key=lambda r: r.transaction_date, reverse=True)
+    leads = await lead_repo.get_by_partner(db, partner_id)
+    leads_sorted = sorted(leads, key=lambda l: l.created_at, reverse=True)
     return templates.TemplateResponse(
         request, "admin/partials/partner_detail.html",
-        {"partner": partner, "invoices": invoices_sorted, "rewards": rewards_sorted},
+        {"partner": partner, "invoices": invoices_sorted, "rewards": rewards_sorted, "leads": leads_sorted},
     )
 
 
@@ -215,9 +218,11 @@ async def partner_edit_post(
     invoices_sorted = sorted(invoices, key=lambda i: i.created_at, reverse=True)
     rewards = await reward_repo.get_by_partner(db, partner_id)
     rewards_sorted = sorted(rewards, key=lambda r: r.transaction_date, reverse=True)
+    leads = await lead_repo.get_by_partner(db, partner_id)
+    leads_sorted = sorted(leads, key=lambda l: l.created_at, reverse=True)
     return templates.TemplateResponse(
         request, "admin/partials/partner_detail.html",
-        {"partner": partner, "invoices": invoices_sorted, "rewards": rewards_sorted},
+        {"partner": partner, "invoices": invoices_sorted, "rewards": rewards_sorted, "leads": leads_sorted},
     )
 
 
@@ -242,6 +247,29 @@ async def partner_invoice_detail(
             "rewards": rewards_sorted,
             "back_url": f"/admin/partners/{partner_id}/detail",
             "back_target": "#partners-main",
+        },
+    )
+
+
+@router.get("/partners/{partner_id}/leads/{lead_id}", response_class=HTMLResponse)
+async def partner_lead_detail(
+    request: Request,
+    partner_id: uuid.UUID,
+    lead_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    if not get_current_user_id(request):
+        return RedirectResponse(url="/admin/login", status_code=302)
+    lead = await lead_repo.get_by_id(db, lead_id)
+    if not lead or lead.partner_id != partner_id:
+        return HTMLResponse("<p style='color:#e85454;'>Lead not found.</p>", status_code=404)
+    partner = await partner_repo.get_by_id(db, partner_id)
+    return templates.TemplateResponse(
+        request, "admin/partials/lead_detail.html",
+        {
+            "lead": lead,
+            "partner": partner,
+            "back_url": f"/admin/partners/{partner_id}/detail",
         },
     )
 

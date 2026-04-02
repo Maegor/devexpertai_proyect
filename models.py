@@ -119,6 +119,7 @@ class Partner(Base):
     assigned_sales_rep: Mapped["InternalUser | None"] = relationship("InternalUser", foreign_keys=[assigned_sales_rep_id])
     billing_entities: Mapped[list["BillingEntity"]] = relationship("BillingEntity", back_populates="partner", cascade="all, delete-orphan")
     partner_campaigns: Mapped[list["PartnerCampaign"]] = relationship("PartnerCampaign", back_populates="partner", cascade="all, delete-orphan")
+    leads: Mapped[list["Lead"]] = relationship("Lead", back_populates="partner", cascade="all, delete-orphan")
 
 
 class InvoiceType(str, enum.Enum):
@@ -308,6 +309,50 @@ class PartnerDeal(Base):
 
     # Relationships
     partner: Mapped["Partner"] = relationship("Partner", foreign_keys=[partner_id])
+
+
+# ── Lead ──────────────────────────────────────────────────────────────────────
+
+class LeadStatus(str, enum.Enum):
+    New       = "New"
+    Contacted = "Contacted"
+    Qualified = "Qualified"
+    Proposal  = "Proposal"
+    Won       = "Won"
+    Lost      = "Lost"
+
+
+lead_status_enum = PgEnum(LeadStatus, name="lead_status", create_type=True)
+
+
+class Lead(Base):
+    __tablename__ = "leads"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    partner_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("partners.id", ondelete="CASCADE"), nullable=False
+    )
+
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    phone: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    company: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    status: Mapped[LeadStatus] = mapped_column(
+        lead_status_enum, nullable=False, default=LeadStatus.New
+    )
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=False), server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=False), server_default=func.now(), onupdate=func.now()
+    )
+
+    # Relationships
+    partner: Mapped["Partner"] = relationship("Partner", back_populates="leads")
 
 
 # ── Campaign ──────────────────────────────────────────────────────────────────
